@@ -273,19 +273,19 @@ def calculate_rams_IWC(filenames,**kwargs):
     
 def calculate_rams_airmass(filenames,**kwargs):
     from iris.cube import Cube
-#    from iris.coords import AuxCoord
-    from iris.utils import as_compatible_shape
+    from iris.coords import AuxCoord
+    from iris.util import as_compatible_shape
     rho=loadramscube(filenames,'DN0',**kwargs)
     z=rho.coord('geopotential_height')    
-    z_diff=Cube(mydiff(z.points))
-    z_diff.add_dim_coord(rho.coord('geopotential_height'),data_dim=0)    
-    print(z)
-    print(z_diff)
-    print(as_compatible_shape(z_diff, rho))
-    Airmass=rho*as_compatible_shape(z_diff, rho)
+    z_dim=rho.coord_dims('geopotential_height')
+    z_diff=AuxCoord(mydiff(z.points),var_name='z_diff')
+    rho.add_aux_coord(z_diff,data_dims=z_dim)    
+    Airmass=rho*rho.coord('z_diff') 
+    Airmass.remove_coord('z_diff')
     Airmass.rename('mass of air')
     Airmass.units='kg m-2'
     return Airmass
+
 
 def calculate_rams_density(filenames,**kwargs):
     rho=loadramscube(filenames,'DN0',**kwargs)
