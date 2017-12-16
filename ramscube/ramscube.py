@@ -193,7 +193,14 @@ def make_time_coord(coord_dict):
 
     time_days=(timeobj - base_date).total_seconds() / timedelta(days=1).total_seconds()
     time_coord=coords.DimCoord(time_days, standard_name='time', long_name='time', var_name='time', units=time_units, bounds=None, attributes=None, coord_system=None, circular=False)
-    return time_coord              
+    return time_coord    
+
+def make_model_level_number_coordinate(n_level):
+    from iris import coords
+    from numpy import arange
+    MODEL_LEVEL_NUMBER=arange(0,n_level)
+    model_level_number=coords.AuxCoord(MODEL_LEVEL_NUMBER, standard_name='model_level_number', units='1')
+    return model_level_number          
 
 
 def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,add_coordinates=None):        
@@ -203,15 +210,17 @@ def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_di
 #    coord_system=coord_systems.LambertConformal(central_lat=MOAD_CEN_LAT, central_lon=CEN_LON, false_easting=0.0, false_northing=0.0, secant_latitudes=(TRUELAT1, TRUELAT2))
     coord_system=None
     if (variable_dict[variable]==3):
-    
+        time_coord=make_time_coord(coord_dict)
+        variable_cube.add_aux_coord(time_coord)
+        z_coord=coords.DimCoord(coord_dict['ztn03'], standard_name='geopotential_height', long_name='z', var_name='z', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        variable_cube.add_dim_coord(z_coord,0)
+        model_level_number_coord=make_model_level_number_coordinate(len(z_coord.points))
+        variable_cube.add_aux_coord(model_level_number_coord,0)
         x_coord=coords.DimCoord(coord_dict['xtn03'], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(x_coord,1)
         y_coord=coords.DimCoord(coord_dict['ytn03'], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(y_coord,2)
-        z_coord=coords.DimCoord(coord_dict['ztn03'], standard_name='geopotential_height', long_name='z', var_name='z', units='m', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_dim_coord(z_coord,0)
-        time_coord=make_time_coord(coord_dict)
-        variable_cube.add_aux_coord(time_coord)
+
 
 
     elif (variable_dict[variable]==2):
@@ -272,9 +281,7 @@ def calculate_rams_IWC(filenames,**kwargs):
 
     
 def calculate_rams_airmass(filenames,**kwargs):
-    from iris.cube import Cube
     from iris.coords import AuxCoord
-    from iris.util import as_compatible_shape
     rho=loadramscube(filenames,'DN0',**kwargs)
     z=rho.coord('geopotential_height')    
     z_dim=rho.coord_dims('geopotential_height')
