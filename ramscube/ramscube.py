@@ -10,6 +10,8 @@ warnings.filterwarnings('ignore', category=UserWarning, append=True)
 #    return  variable_cube
 
 
+
+
 RAMS_Units=dict()
 RAMS_Units['UC']='m s-1'
 RAMS_Units['VC']='m s-1'
@@ -74,6 +76,34 @@ variable_list_derive=[
 #    return variable_cube
 
 
+
+# def load(filenames,variable,mode='auto',**kwargs):
+#     if mode=='auto':
+#         variable_list_file=variable_list(filenames)
+#         if variable in variable_list_file:
+#             variable_cube=loadwrfcube(filenames,variable,**kwargs)
+#         elif variable in variable_list_derive:
+#             variable_cube=derivewrfcube(filenames,variable,**kwargs)
+#         elif variable in variable_dict_pseudonym.keys():
+#             variable_load=variable_dict_pseudonym[variable]
+#             variable_cube=loadwrfcube(filenames,variable_load,**kwargs)
+#         else:
+#             raise SystemExit('variable not found')
+
+#     elif mode=='file':
+#         variable_list_file=variable_list(filenames)
+#         if variable in variable_list_file:
+#             variable_cube=loadwrfcube(filenames,variable,**kwargs)
+#     elif mode=='derive':
+#         variable_cube=derivewrfcube(filenames,variable,**kwargs)
+#     elif mode=='pseudonym':
+#         variable_load=variable_dict_pseudonym[variable]
+#         variable_cube=loadwrfcube(filenames,variable_load,**kwargs)
+#     else:
+#        print("mode=",mode)
+#        raise SystemExit('unknown mode')
+
+#     return variable_cube
 
 
 
@@ -205,6 +235,7 @@ def make_model_level_number_coordinate(n_level):
 
 def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,add_coordinates=None):        
     from iris import coords
+    import numpy as np
 #    from iris import coord_systems
 
 #    coord_system=coord_systems.LambertConformal(central_lat=MOAD_CEN_LAT, central_lon=CEN_LON, false_easting=0.0, false_northing=0.0, secant_latitudes=(TRUELAT1, TRUELAT2))
@@ -216,18 +247,26 @@ def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_di
         variable_cube.add_dim_coord(z_coord,0)
         model_level_number_coord=make_model_level_number_coordinate(len(z_coord.points))
         variable_cube.add_aux_coord(model_level_number_coord,0)
-        x_coord=coords.DimCoord(coord_dict['xtn03'], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        x_coord=coords.DimCoord(np.arange(len(coord_dict['xtn03'])), long_name='x', units='1', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(x_coord,1)
-        y_coord=coords.DimCoord(coord_dict['ytn03'], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        y_coord=coords.DimCoord(np.arange(len(coord_dict['ytn03'])), long_name='y', units='1', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(y_coord,2)
+        projection_x_coord=coords.DimCoord(coord_dict['xtn03'], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        variable_cube.add_aux_coord(projection_x_coord,(1))
+        projection_y_coord=coords.DimCoord(coord_dict['ytn03'], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        variable_cube.add_aux_coord(projection_y_coord,(2))
 
 
 
     elif (variable_dict[variable]==2):
-        x_coord=coords.DimCoord(coord_dict['xtn03'], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        x_coord=coords.DimCoord(np.arange(len(coord_dict['xtn03'])), long_name='x', units='1', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(x_coord,0)
-        y_coord=coords.DimCoord(coord_dict['ytn03'], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        y_coord=coords.DimCoord(np.arange(len(coord_dict['ytn03'])), long_name='y', units='1', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(y_coord,1)
+        projection_x_coord=coords.DimCoord(coord_dict['xtn03'], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        variable_cube.add_aux_coord(projection_x_coord,(0))
+        projection_y_coord=coords.DimCoord(coord_dict['ytn03'], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        variable_cube.add_aux_coord(projection_y_coord,(1))
         time_coord=make_time_coord(coord_dict)
         variable_cube.add_aux_coord(time_coord)
     return variable_cube
@@ -329,6 +368,16 @@ def calculate_rams_IWV(filenames,**kwargs):
     return IWV
 
 
+def calculate_rams_OLRV(filenames,**kwargs):    
+    RV=loadramscube(filenames,'LWUP',**kwargs)
+    OLR=RW[:,-1,:,:]
+    OLR.rename('Outgoing longwave radiation')
+    #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
+    return OLR
+
+
+	
+
 def mydiff(A):
     import numpy as np
     d1=np.diff(A)
@@ -359,6 +408,8 @@ def deriveramscube(filenames,variable,**kwargs):
         variable_cube=calculate_rams_IWV(filenames,**kwargs)
     elif variable == 'airmass':    
         variable_cube=calculate_rams_airmass(filenames,**kwargs)
+    elif variable == 'OLR':    
+        variable_cube=calculate_rams_OLR(filenames,**kwargs)
 
     
 #    if variable == 'potential temperature':
