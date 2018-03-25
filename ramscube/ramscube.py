@@ -35,6 +35,10 @@ RAMS_Units['CAP']='kg-1'
 RAMS_Units['CGP']='kg-1'	
 RAMS_Units['CHP']='kg-1'
 RAMS_Units['DN0']='kg m-3'
+RAMS_Units['ACCPR']='kg m-2'
+RAMS_Units['PCPRR']='kg m-2 s-1'
+RAMS_Units['LWUP']='W m-2'
+RAMS_Units['LWDN']='W m-2'
 
 RAMS_standard_name=dict()
 
