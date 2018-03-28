@@ -199,17 +199,11 @@ def readramsheader(filename):
     return variable_dict, coord_dict
 
 def addcoordinates(filename, variable,variable_cube,**kwargs):
-    if 'add_coordinates' in kwargs:
-        add_coordinates=kwargs['add_coordinates']
-    else:
-        add_coordinates=None
+
     filename_header=filename[:-5]+'head.txt'
     variable_dict, coord_dict=readramsheader(filename_header)
-    if add_coordinates==None:
-        variable_cube=add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,**kwargs)
-    else:
-        variable_cube=add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,**kwargs)
-        variable_cube=add_aux_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,**kwargs)
+    variable_cube=add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,**kwargs)
+    variable_cube=add_aux_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,**kwargs)
     return variable_cube
  
     
@@ -280,24 +274,37 @@ def add_aux_coordinates(filename,variable,variable_cube,variable_dict, coord_dic
     from iris import load_cube,coords
     coord_system=None
 
-    add_coordinates=kwargs.pop('add_coordinates')
-    if type(add_coordinates)!=list:
-        add_coordinates1=add_coordinates
-        add_coordinates=[]
-        add_coordinates.append(add_coordinates1)
-    for coordinate in add_coordinates:
-        if coordinate=='latlon': 
-            latitude=load_cube(filename,'GLAT').data
-            longitude=load_cube(filename,'GLON').data
-            lat_coord=coords.AuxCoord(latitude, standard_name='latitude', long_name='latitude', var_name='latitude', units='degrees', bounds=None, attributes=None, coord_system=coord_system)
-            lon_coord=coords.AuxCoord(longitude, standard_name='longitude', long_name='longitude', var_name='longitude', units='degrees', bounds=None, attributes=None, coord_system=coord_system)
 
-            if (variable_dict[variable]==3):                
-                variable_cube.add_aux_coord(lon_coord,(1,2))
-                variable_cube.add_aux_coord(lat_coord,(1,2))
-            elif (variable_dict[variable]==2):
-                variable_cube.add_aux_coord(lon_coord,(0,1))                
-                variable_cube.add_aux_coord(lat_coord,(0,1))
+    latitude=load_cube(filename,'GLAT').data
+    longitude=load_cube(filename,'GLON').data
+    lat_coord=coords.AuxCoord(latitude, standard_name='latitude', long_name='latitude', var_name='latitude', units='degrees', bounds=None, attributes=None, coord_system=coord_system)
+    lon_coord=coords.AuxCoord(longitude, standard_name='longitude', long_name='longitude', var_name='longitude', units='degrees', bounds=None, attributes=None, coord_system=coord_system)
+
+    if (variable_dict[variable]==3):                
+         variable_cube.add_aux_coord(lon_coord,(1,2))
+         variable_cube.add_aux_coord(lat_coord,(1,2))
+    elif (variable_dict[variable]==2):
+            variable_cube.add_aux_coord(lon_coord,(0,1))                
+            variable_cube.add_aux_coord(lat_coord,(0,1))
+
+    # add_coordinates=kwargs.pop('add_coordinates')
+    # if type(add_coordinates)!=list:
+    #     add_coordinates1=add_coordinates
+    #     add_coordinates=[]
+    #     add_coordinates.append(add_coordinates1)
+    # for coordinate in add_coordinates:
+    #     if coordinate=='latlon': 
+    #         latitude=load_cube(filename,'GLAT').data
+    #         longitude=load_cube(filename,'GLON').data
+    #         lat_coord=coords.AuxCoord(latitude, standard_name='latitude', long_name='latitude', var_name='latitude', units='degrees', bounds=None, attributes=None, coord_system=coord_system)
+    #         lon_coord=coords.AuxCoord(longitude, standard_name='longitude', long_name='longitude', var_name='longitude', units='degrees', bounds=None, attributes=None, coord_system=coord_system)
+
+    #         if (variable_dict[variable]==3):                
+    #             variable_cube.add_aux_coord(lon_coord,(1,2))
+    #             variable_cube.add_aux_coord(lat_coord,(1,2))
+    #         elif (variable_dict[variable]==2):
+    #             variable_cube.add_aux_coord(lon_coord,(0,1))                
+    #             variable_cube.add_aux_coord(lat_coord,(0,1))
 
     return variable_cube
 
