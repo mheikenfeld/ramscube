@@ -95,7 +95,8 @@ RAMS_standard_name=dict()
 
 variable_list_derive=[
         'potential_temperature',
-        'temperature'
+        'temperature',
+        'OLR'
         ]
 #def variable_list(filenames):
 #    from netCDF4 import Dataset
@@ -130,35 +131,47 @@ variable_list_derive=[
 #
 #    return variable_cube
 
+def variable_list(filenames):
+    from iris import load
+    cubelist=load(filenames[0])
+    variable_list = [cube.name() for cube in cubelist]
+    return variable_list
 
 
-# def load(filenames,variable,mode='auto',**kwargs):
-#     if mode=='auto':
-#         variable_list_file=variable_list(filenames)
-#         if variable in variable_list_file:
-#             variable_cube=loadwrfcube(filenames,variable,**kwargs)
-#         elif variable in variable_list_derive:
-#             variable_cube=derivewrfcube(filenames,variable,**kwargs)
-#         elif variable in variable_dict_pseudonym.keys():
-#             variable_load=variable_dict_pseudonym[variable]
-#             variable_cube=loadwrfcube(filenames,variable_load,**kwargs)
-#         else:
-#             raise SystemExit('variable not found')
 
-#     elif mode=='file':
-#         variable_list_file=variable_list(filenames)
-#         if variable in variable_list_file:
-#             variable_cube=loadwrfcube(filenames,variable,**kwargs)
-#     elif mode=='derive':
-#         variable_cube=derivewrfcube(filenames,variable,**kwargs)
-#     elif mode=='pseudonym':
-#         variable_load=variable_dict_pseudonym[variable]
-#         variable_cube=loadwrfcube(filenames,variable_load,**kwargs)
-#     else:
-#        print("mode=",mode)
-#        raise SystemExit('unknown mode')
+def load(filenames,variable,mode='auto',**kwargs):
+    if variable in variable_list_derive:
+        variable_cube=deriveramscube(filenames,variable,**kwargs)
+    else:
+        variable_cube=loadramscube(filenames,variable,**kwargs)
 
-#     return variable_cube
+    # if mode=='auto':
+    #     variable_list_file=variable_list(filenames)
+    #     if variable in variable_list_file:
+    #         variable_cube=loadramscube(filenames,variable,**kwargs)
+    #     elif variable in variable_list_derive:
+    #         variable_cube=deriveramscube(filenames,variable,**kwargs)
+    #     elif variable in variable_dict_pseudonym.keys():
+    #         variable_load=variable_dict_pseudonym[variable]
+    #         variable_cube=loadramscube(filenames,variable_load,**kwargs)
+    #     else:
+    #         raise SystemExit('variable not found')
+
+    # elif mode=='file':
+    #     variable_list_file=variable_list(filenames)
+    #     if variable in variable_list_file:
+    #         variable_cube=loadramscube(filenames,variable,**kwargs)
+            
+    # elif mode=='derive':
+    #     variable_cube=deriveramscube(filenames,variable,**kwargs)
+    # elif mode=='pseudonym':
+    #     variable_load=variable_dict_pseudonym[variable]
+    #     variable_cube=loadramscube(filenames,variable_load,**kwargs)
+    # else:
+    #     print("mode=",mode)
+    #     raise SystemExit('unknown mode')
+
+    return variable_cube
 
 
 
@@ -430,9 +443,9 @@ def calculate_rams_IWV(filenames,**kwargs):
     return IWV
 
 
-def calculate_rams_OLRV(filenames,**kwargs):    
-    RV=loadramscube(filenames,'LWUP',**kwargs)
-    OLR=RW[:,-1,:,:]
+def calculate_rams_OLR(filenames,**kwargs):    
+    LWUP=loadramscube(filenames,'LWUP',**kwargs)
+    OLR=LWUP[:,-1,:,:]
     OLR.rename('Outgoing longwave radiation')
     #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
     return OLR
