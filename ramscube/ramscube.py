@@ -40,6 +40,57 @@ RAMS_Units['PCPRR']='kg m-2 s-1'
 RAMS_Units['LWUP']='W m-2'
 RAMS_Units['LWDN']='W m-2'
 
+RAMS_processes_mass=[
+'NUCCLDRT',
+'NUCICERT',
+'INUCHOMRT',
+'INUCCONTR',
+'INUCIFNRT',
+'INUCHAZRT',
+'VAPCLDT',
+'VAPRAINT',
+'VAPPRIST',
+'VAPSNOWT'	,
+'VAPAGGRT'	,
+'VAPGRAUT',
+'VAPHAILT'	,
+'VAPDRIZT'	,
+'MELTSNOWT',
+'MELTAGGRT',
+'MELTGRAUT',
+'MELTHAILT',
+'RIMECLDSNOWT',
+'RIMECLDAGGRT',
+'RIMECLDGRAUT',
+'RIMECLDHAILT',
+'RAIN2PRT',
+'RAIN2SNT',
+'RAIN2AGT',
+'RAIN2GRT',
+'RAIN2HAT',
+'AGGRSELFPRIST',
+'AGGRSELFSNOWT',
+'AGGRPRISSNOWT'
+]
+for variable in RAMS_processes_mass:
+    RAMS_Units[variable]='kg kg-1'
+
+RAMS_processes_mass_grouped=[
+'VAPLIQT',
+'VAPICET	',
+'MELTICET',
+'CLD2RAINT'
+'RIMECLDT'
+'RAIN2ICET'
+'ICE2RAINT'
+'AGGREGATET'	
+]
+    
+for variable in RAMS_processes_mass_grouped:
+    RAMS_Units[variable]='kg kg-1'
+
+
+
 RAMS_standard_name=dict()
 
 variable_list_derive=[
