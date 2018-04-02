@@ -339,8 +339,8 @@ def add_aux_coordinates(filename,variable,variable_cube,variable_dict, coord_dic
     coord_system=None
 
 
-    latitude=load_cube(filename,'GLAT').data
-    longitude=load_cube(filename,'GLON').data
+    latitude=load_cube(filename,'GLAT').core_data()
+    longitude=load_cube(filename,'GLON').core_data()
     lat_coord=coords.AuxCoord(latitude, standard_name='latitude', long_name='latitude', var_name='latitude', units='degrees', bounds=None, attributes=None, coord_system=coord_system)
     lon_coord=coords.AuxCoord(longitude, standard_name='longitude', long_name='longitude', var_name='longitude', units='degrees', bounds=None, attributes=None, coord_system=coord_system)
 
