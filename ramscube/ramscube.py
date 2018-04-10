@@ -267,9 +267,11 @@ def readramsheader(filename):
 def addcoordinates(filename, variable,variable_cube,**kwargs):
 
     filename_header=filename[:-5]+'head.txt'
+    domain=filename[-4]
+
     variable_dict, coord_dict=readramsheader(filename_header)
-    variable_cube=add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,**kwargs)
-    variable_cube=add_aux_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,**kwargs)
+    variable_cube=add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,domain,**kwargs)
+    variable_cube=add_aux_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,domain,**kwargs)
     return variable_cube
  
     
@@ -297,10 +299,11 @@ def make_model_level_number_coordinate(n_level):
     return model_level_number          
 
 
-def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,add_coordinates=None):        
+def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_dict,domain,add_coordinates=None):        
     from iris import coords
     import numpy as np
-#    from iris import coord_systems
+   
+        #    from iris import coord_systems
 
 #    coord_system=coord_systems.LambertConformal(central_lat=MOAD_CEN_LAT, central_lon=CEN_LON, false_easting=0.0, false_northing=0.0, secant_latitudes=(TRUELAT1, TRUELAT2))
     coord_system=None
@@ -311,32 +314,32 @@ def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_di
         variable_cube.add_dim_coord(z_coord,0)
         model_level_number_coord=make_model_level_number_coordinate(len(z_coord.points))
         variable_cube.add_aux_coord(model_level_number_coord,0)
-        x_coord=coords.DimCoord(np.arange(len(coord_dict['xtn03'])), long_name='x', units='1', bounds=None, attributes=None, coord_system=coord_system)
+        x_coord=coords.DimCoord(np.arange(len(coord_dict['xtn0'+domain])), long_name='x', units='1', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(x_coord,1)
-        y_coord=coords.DimCoord(np.arange(len(coord_dict['ytn03'])), long_name='y', units='1', bounds=None, attributes=None, coord_system=coord_system)
+        y_coord=coords.DimCoord(np.arange(len(coord_dict['ytn0'+domain])), long_name='y', units='1', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(y_coord,2)
-        projection_x_coord=coords.DimCoord(coord_dict['xtn03'], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        projection_x_coord=coords.DimCoord(coord_dict['xtn0'+domain], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_aux_coord(projection_x_coord,(1))
-        projection_y_coord=coords.DimCoord(coord_dict['ytn03'], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        projection_y_coord=coords.DimCoord(coord_dict['ytn0'+domain], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_aux_coord(projection_y_coord,(2))
 
 
 
     elif (variable_dict[variable]==2):
-        x_coord=coords.DimCoord(np.arange(len(coord_dict['xtn03'])), long_name='x', units='1', bounds=None, attributes=None, coord_system=coord_system)
+        x_coord=coords.DimCoord(np.arange(len(coord_dict['xtn0'+domain])), long_name='x', units='1', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(x_coord,0)
-        y_coord=coords.DimCoord(np.arange(len(coord_dict['ytn03'])), long_name='y', units='1', bounds=None, attributes=None, coord_system=coord_system)
+        y_coord=coords.DimCoord(np.arange(len(coord_dict['ytn0'+domain])), long_name='y', units='1', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(y_coord,1)
-        projection_x_coord=coords.DimCoord(coord_dict['xtn03'], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        projection_x_coord=coords.DimCoord(coord_dict['xtn0'+domain], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_aux_coord(projection_x_coord,(0))
-        projection_y_coord=coords.DimCoord(coord_dict['ytn03'], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        projection_y_coord=coords.DimCoord(coord_dict['ytn0'+domain], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_aux_coord(projection_y_coord,(1))
         time_coord=make_time_coord(coord_dict)
         variable_cube.add_aux_coord(time_coord)
     return variable_cube
 
 
-def add_aux_coordinates(filename,variable,variable_cube,variable_dict, coord_dict,**kwargs):
+def add_aux_coordinates(filename,variable,variable_cube,variable_dict, coord_dict,domain,**kwargs):
     from iris import load_cube,coords
     coord_system=None
 
