@@ -16,16 +16,17 @@ RAMS_Units=dict()
 RAMS_Units['UC']='m s-1'
 RAMS_Units['VC']='m s-1'
 RAMS_Units['WC']='m s-1'
-RAMS_Units['THETA']='K'	
+RAMS_Units['THETA']='K'
+RAMS_Units['PI']='J kg-1 K-1'
 RAMS_Units['RV']='kg kg-1'
-RAMS_Units['RCP']='kg kg-1'	
+RAMS_Units['RCP']='kg kg-1'
 RAMS_Units['RDP']='kg kg-1'
-RAMS_Units['RRP']='kg kg-1'	
-RAMS_Units['RPP']='kg kg-1'		
-RAMS_Units['RSP']='kg kg-1'		
-RAMS_Units['RAP']='kg kg-1'	
-RAMS_Units['RGP']='kg kg-1'		
-RAMS_Units['RHP']='kg kg-1'	
+RAMS_Units['RRP']='kg kg-1'
+RAMS_Units['RPP']='kg kg-1'
+RAMS_Units['RSP']='kg kg-1'
+RAMS_Units['RAP']='kg kg-1'
+RAMS_Units['RGP']='kg kg-1'
+RAMS_Units['RHP']='kg kg-1'
 RAMS_Units['CCP']='kg-1'	
 RAMS_Units['CDP']='kg-1'
 RAMS_Units['CRP']='kg-1'	
@@ -94,8 +95,9 @@ for variable in RAMS_processes_mass_grouped:
 RAMS_standard_name=dict()
 
 variable_list_derive=[
-        'potential_temperature',
+        'air_temperature',
         'temperature',
+        'air_denisty',
         'OLR'
         ]
 #def variable_list(filenames):
@@ -408,9 +410,19 @@ def calculate_rams_airmass(filenames,**kwargs):
     return Airmass
 
 
+def calculate_rams_air_temperature(filenames,**kwargs):
+    from iris.coords import AuxCoord
+    theta=loadramscube(filenames,'THETA',**kwargs)
+    pi=loadramscube(filenames,'PI',**kwargs)
+    cp=AuxCoord(1004,long_name='cp',units='J kg-1 K-1')
+    t=theta*pi/cp
+    t.rename('air_temperature')
+    return t
+
+
 def calculate_rams_density(filenames,**kwargs):
     rho=loadramscube(filenames,'DN0',**kwargs)
-    rho.rename('mass of air')
+    rho.rename('air_density')
     rho.units='kg m-3'
     return rho
 
@@ -483,8 +495,11 @@ def deriveramscube(filenames,variable,**kwargs):
         variable_cube=calculate_rams_IWV(filenames,**kwargs)
     elif variable == 'airmass':    
         variable_cube=calculate_rams_airmass(filenames,**kwargs)
-    elif variable == 'OLR':    
-        variable_cube=calculate_rams_OLR(filenames,**kwargs)
+    elif variable == 'air_temperature':    
+        variable_cube=calculate_rams_air_temperature(filenames,**kwargs)
+    elif variable == 'air_density':    
+        variable_cube=calculate_rams_density(filenames,**kwargs)
+
 
     
 #    if variable == 'potential temperature':
