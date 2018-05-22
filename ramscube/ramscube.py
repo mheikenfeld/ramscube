@@ -51,11 +51,11 @@ RAMS_processes_mass=[
 'VAPCLDT',
 'VAPRAINT',
 'VAPPRIST',
-'VAPSNOWT'	,
-'VAPAGGRT'	,
+'VAPSNOWT',
+'VAPAGGRT',
 'VAPGRAUT',
-'VAPHAILT'	,
-'VAPDRIZT'	,
+'VAPHAILT',
+'VAPDRIZT',
 'MELTSNOWT',
 'MELTAGGRT',
 'MELTGRAUT',
@@ -73,17 +73,18 @@ RAMS_processes_mass=[
 'AGGRSELFSNOWT',
 'AGGRPRISSNOWT'
 ]
+
 for variable in RAMS_processes_mass:
     RAMS_Units[variable]='kg kg-1'
 
 RAMS_processes_mass_grouped=[
 'VAPLIQT',
-'VAPICET	',
+'VAPICET',
 'MELTICET',
-'CLD2RAINT'
-'RIMECLDT'
-'RAIN2ICET'
-'ICE2RAINT'
+'CLD2RAINT',
+'RIMECLDT',
+'RAIN2ICET',
+'ICE2RAINT',
 'AGGREGATET'	
 ]
     
@@ -98,7 +99,12 @@ variable_list_derive=[
         'air_temperature',
         'temperature',
         'air_denisty',
-        'OLR'
+        'OLR',
+        'LWC',
+        'IWC',
+        'LWP',
+        'IWP',
+        'IWV',
         ]
 #def variable_list(filenames):
 #    from netCDF4 import Dataset
@@ -315,25 +321,25 @@ def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_di
         model_level_number_coord=make_model_level_number_coordinate(len(z_coord.points))
         variable_cube.add_aux_coord(model_level_number_coord,0)
         x_coord=coords.DimCoord(np.arange(len(coord_dict['xtn0'+domain])), long_name='x', units='1', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_dim_coord(x_coord,1)
+        variable_cube.add_dim_coord(x_coord,2)
         y_coord=coords.DimCoord(np.arange(len(coord_dict['ytn0'+domain])), long_name='y', units='1', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_dim_coord(y_coord,2)
+        variable_cube.add_dim_coord(y_coord,1)
         projection_x_coord=coords.DimCoord(coord_dict['xtn0'+domain], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_aux_coord(projection_x_coord,(1))
+        variable_cube.add_aux_coord(projection_x_coord,(2))
         projection_y_coord=coords.DimCoord(coord_dict['ytn0'+domain], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_aux_coord(projection_y_coord,(2))
+        variable_cube.add_aux_coord(projection_y_coord,(1))
 
 
 
     elif (variable_dict[variable]==2):
         x_coord=coords.DimCoord(np.arange(len(coord_dict['xtn0'+domain])), long_name='x', units='1', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_dim_coord(x_coord,0)
+        variable_cube.add_dim_coord(x_coord,1)
         y_coord=coords.DimCoord(np.arange(len(coord_dict['ytn0'+domain])), long_name='y', units='1', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_dim_coord(y_coord,1)
+        variable_cube.add_dim_coord(y_coord,0)
         projection_x_coord=coords.DimCoord(coord_dict['xtn0'+domain], standard_name='projection_x_coordinate', long_name='x', var_name='x', units='m', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_aux_coord(projection_x_coord,(0))
+        variable_cube.add_aux_coord(projection_x_coord,(1))
         projection_y_coord=coords.DimCoord(coord_dict['ytn0'+domain], standard_name='projection_y_coordinate', long_name='y', var_name='y', units='m', bounds=None, attributes=None, coord_system=coord_system)
-        variable_cube.add_aux_coord(projection_y_coord,(1))
+        variable_cube.add_aux_coord(projection_y_coord,(0))
         time_coord=make_time_coord(coord_dict)
         variable_cube.add_aux_coord(time_coord)
     return variable_cube
