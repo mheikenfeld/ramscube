@@ -105,6 +105,8 @@ variable_list_derive=[
         'LWP',
         'IWP',
         'IWV',
+        'airmass',
+        'airmass_path'
         ]
 #def variable_list(filenames):
 #    from netCDF4 import Dataset
@@ -407,6 +409,22 @@ def calculate_rams_IWC(filenames,**kwargs):
     
 def calculate_rams_airmass(filenames,**kwargs):
     from iris.coords import AuxCoord
+    from numpy import diff
+    rho=loadramscube(filenames,'DN0',**kwargs)
+    z=rho.coord('geopotential_height')    
+    z_dim=rho.coord_dims('geopotential_height')
+    z_diff=AuxCoord(mydiff(z.points),var_name='z_diff')
+    rho.add_aux_coord(z_diff,data_dims=z_dim)
+    dx=diff(rho.coord('projection_x_coordinate').points[0:2])
+    dy=diff(rho.coord('projection_y_coordinate').points[0:2])
+    Airmass=rho*rho.coord('z_diff')*dx*dy
+    Airmass.remove_coord('z_diff')
+    Airmass.rename('mass_of_air')
+    Airmass.units='kg'
+    return Airmass
+
+def calculate_rams_airmass_path(filenames,**kwargs):
+    from iris.coords import AuxCoord
     rho=loadramscube(filenames,'DN0',**kwargs)
     z=rho.coord('geopotential_height')    
     z_dim=rho.coord_dims('geopotential_height')
@@ -414,9 +432,10 @@ def calculate_rams_airmass(filenames,**kwargs):
     rho.add_aux_coord(z_diff,data_dims=z_dim)    
     Airmass=rho*rho.coord('z_diff') 
     Airmass.remove_coord('z_diff')
-    Airmass.rename('mass of air')
+    Airmass.rename('airmass_path')
     Airmass.units='kg m-2'
     return Airmass
+
 
 
 def calculate_rams_air_temperature(filenames,**kwargs):
@@ -508,6 +527,9 @@ def deriveramscube(filenames,variable,**kwargs):
         variable_cube=calculate_rams_air_temperature(filenames,**kwargs)
     elif variable == 'air_density':    
         variable_cube=calculate_rams_density(filenames,**kwargs)
+    elif variable == 'airmass_path':    
+        variable_cube=calculate_rams_airmass_path(filenames,**kwargs)
+
 
 
     
