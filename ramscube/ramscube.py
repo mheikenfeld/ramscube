@@ -458,7 +458,7 @@ def calculate_rams_density(filenames,**kwargs):
 def calculate_rams_LWP(filenames,**kwargs):
     from iris.analysis import SUM
     LWC=deriveramscube(filenames,'LWC',**kwargs)
-    Airmass=deriveramscube(filenames,'airmass',**kwargs)
+    Airmass=deriveramscube(filenames,'airmass_path',**kwargs)
     LWP=(LWC*Airmass).collapsed(('geopotential_height'),SUM)
     LWP.rename('liquid water path')
     #LWP.rename('atmosphere_mass_content_of_cloud_liquid_water')
@@ -467,7 +467,7 @@ def calculate_rams_LWP(filenames,**kwargs):
 def calculate_rams_IWP(filenames,**kwargs):    
     from iris.analysis import SUM
     IWC=deriveramscube(filenames,'IWC',**kwargs)
-    Airmass=deriveramscube(filenames,'airmass',**kwargs)
+    Airmass=deriveramscube(filenames,'airmass_path',**kwargs)
     IWP=(IWC*Airmass).collapsed(('geopotential_height'),SUM)
     IWP.rename('ice water path')
     #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
@@ -476,7 +476,7 @@ def calculate_rams_IWP(filenames,**kwargs):
 def calculate_rams_IWV(filenames,**kwargs):    
     from iris.analysis import SUM
     RV=loadramscube(filenames,'RV',**kwargs)
-    Airmass=deriveramscube(filenames,'airmass',**kwargs)
+    Airmass=deriveramscube(filenames,'airmass_path',**kwargs)
     IWV=(RV*Airmass).collapsed(('geopotential_height'),SUM)
     IWV.rename('integrated water vapor')
     #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
