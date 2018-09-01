@@ -98,7 +98,7 @@ RAMS_standard_name=dict()
 variable_list_derive=[
         'air_temperature',
         'temperature',
-        'air_denisty',
+        'air_density',
         'OLR',
         'LWC',
         'IWC',
