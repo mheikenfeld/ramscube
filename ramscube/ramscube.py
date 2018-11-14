@@ -388,7 +388,7 @@ def add_aux_coordinates(filename,variable,variable_cube,variable_dict, coord_dic
 def calculate_rams_LWC(filenames,**kwargs):
     RCP=loadramscube(filenames, 'RCP',**kwargs)
     RDP=loadramscube(filenames, 'RDP',**kwargs)
-    RRP=loadramscube(filenames, 'RDP',**kwargs)
+    RRP=loadramscube(filenames, 'RRP',**kwargs)
     LWC=RCP+RDP+RRP
     LWC.rename('liquid water content')
     #LWC.rename('mass_concentration_of_liquid_water_in_air')
