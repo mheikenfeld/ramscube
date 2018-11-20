@@ -1,46 +1,44 @@
 import warnings
 warnings.filterwarnings('ignore', category=UserWarning, append=True)
 
-#Added for RAMS:
-    
-#def loadrams(filename,variable):
-#    from iris import load_cube 
-#    variable_cube=load_cube(filename,variable)
-#    add_dim_coordinates(filename, variable,variable_cube,add_coordinates=None)
-#    return  variable_cube
-
-
-
-
 RAMS_Units=dict()
+# winds
 RAMS_Units['UC']='m s-1'
 RAMS_Units['VC']='m s-1'
 RAMS_Units['WC']='m s-1'
+# potential temperature
 RAMS_Units['THETA']='K'
 RAMS_Units['PI']='J kg-1 K-1'
-RAMS_Units['RV']='kg kg-1'
-RAMS_Units['RCP']='kg kg-1'
-RAMS_Units['RDP']='kg kg-1'
-RAMS_Units['RRP']='kg kg-1'
-RAMS_Units['RPP']='kg kg-1'
-RAMS_Units['RSP']='kg kg-1'
-RAMS_Units['RAP']='kg kg-1'
-RAMS_Units['RGP']='kg kg-1'
-RAMS_Units['RHP']='kg kg-1'
-RAMS_Units['CCP']='kg-1'	
-RAMS_Units['CDP']='kg-1'
-RAMS_Units['CRP']='kg-1'	
-RAMS_Units['CPP']='kg-1'
-RAMS_Units['CSP']='kg-1'	
-RAMS_Units['CAP']='kg-1'
-RAMS_Units['CGP']='kg-1'	
-RAMS_Units['CHP']='kg-1'
 RAMS_Units['DN0']='kg m-3'
-RAMS_Units['ACCPR']='kg m-2'
-RAMS_Units['PCPRR']='kg m-2 s-1'
+
+# water vapour mixing ratio:
+RAMS_Units['RV']='kg kg-1'
+
+# hydrometeor mass mixing ratios:
+mass_mixing_ratios=['RCP','RDP','RRP','RPP','RSP','RAP','RGP','RHP']
+for variable in mass_mixing_ratios:
+    RAMS_Units[variable]='kg kg-1'
+
+# hydrometeor number mixing ratios:
+mass_mixing_ratios=['CCP','CDP','CRP','CPP','CSP','CAP','CGP','CHP']
+for variable in mass_mixing_ratios:
+    RAMS_Units[variable]='kg-1'
+
+#hydrometeor precipitation rates:
+precipitation_rates=['PCPRR','PCPRD','PCPRS','PCPRH','PCPRP','PCPRA','PCPRG']
+for variable in precipitation_rates:
+    RAMS_Units[variable]='kg m-2'
+    
+# hydrometeor precipitation accumulated:
+precipitation_accumulated=['ACCPR','ACCPD','ACCPS','ACCPH','ACCPP','ACCPA','ACCPG']
+for variable in precipitation_accumulated:
+    RAMS_Units[variable]='kg m-2 s-1'
+
+# radiation
 RAMS_Units['LWUP']='W m-2'
 RAMS_Units['LWDN']='W m-2'
 
+# individual microphysics processes accumulated
 RAMS_processes_mass=[
 'NUCCLDRT',
 'NUCICERT',
@@ -77,6 +75,7 @@ RAMS_processes_mass=[
 for variable in RAMS_processes_mass:
     RAMS_Units[variable]='kg kg-1'
 
+# grouped microphysics processes accumulated:
 RAMS_processes_mass_grouped=[
 'VAPLIQT',
 'VAPICET',
@@ -87,10 +86,23 @@ RAMS_processes_mass_grouped=[
 'ICE2RAINT',
 'AGGREGATET'	
 ]
-    
 for variable in RAMS_processes_mass_grouped:
     RAMS_Units[variable]='kg kg-1'
 
+# grouped microphysics processes instantaneous:
+RAMS_processes_mass_grouped_instantaneous=[
+'VAPLIQ',
+'VAPICE',
+'MELTICE',
+'CLD2RAIN',
+'RIMECLD',
+'RAIN2ICE',
+'ICE2RAIN',
+'NUCCLDR',
+'NUCICER'
+]
+for variable in RAMS_processes_mass_grouped_instantaneous:
+    RAMS_Units[variable]='kg kg-1 s-1'
 
 
 RAMS_standard_name=dict()
@@ -106,48 +118,16 @@ variable_list_derive=[
         'IWP',
         'IWV',
         'airmass',
-        'airmass_path'
+        'airmass_path',
+        'surface_precipitation',
+        'surface_precipitation_accumulated',
         ]
-#def variable_list(filenames):
-#    from netCDF4 import Dataset
-#    if type(filenames)==list:
-#        filenames=filenames[0]
-#    variable_list = list(Dataset(filenames).variables)
-#    return variable_list
-#
-#
-#def load(filenames,variable,mode='auto',**kwargs):
-#    if mode=='auto':
-#        variable_list_file=variable_list(filenames)
-#        if variable in variable_list_file:
-#            variable_cube=loadwrfcube(filenames,variable,**kwargs)
-#        elif variable in variable_list_derive:
-#            variable_cube=derivewrfcube(filenames,variable,**kwargs)
-#        elif variable in variable_dict_pseudonym.keys:
-#            variable_load=variable_dict_pseudonym[variable]
-#            variable_cube=loadwrfcube(filenames,variable_load,**kwargs)
-#    elif mode=='file':
-#        variable_list_file=variable_list(filenames)
-#        if variable in variable_list_file:
-#            variable_cube=loadwrfcube(filenames,variable,**kwargs)
-#    elif mode=='derive':
-#        variable_cube=derivewrfcube(filenames,variable,**kwargs)
-#    elif mode=='pseudonym':
-#        variable_load=variable_dict_pseudonym[variable]
-#        variable_cube=loadwrfcube(filenames,variable_load,**kwargs)
-#    else:
-#       print("mode=",mode)
-#       raise SystemExit('unknown mode')
-#
-#    return variable_cube
 
 def variable_list(filenames):
     from iris import load
     cubelist=load(filenames[0])
     variable_list = [cube.name() for cube in cubelist]
     return variable_list
-
-
 
 def load(filenames,variable,mode='auto',**kwargs):
     if variable in variable_list_derive:
@@ -193,9 +173,8 @@ def loadramscube(filenames,variable,**kwargs):
     else:
         print("filenames=",filenames)
         raise SystemExit('Type of input unknown: Must be str of list')
-    
     return variable_cube
-    
+
 def loadramscube_single(filenames,variable,constraint=None,add_coordinates=None):
     from iris import load_cube 
 
@@ -205,12 +184,10 @@ def loadramscube_single(filenames,variable,constraint=None,add_coordinates=None)
     variable_cube=addcoordinates(filenames, variable,variable_cube,add_coordinates=add_coordinates)
     return  variable_cube
 
-        
-    
 def loadramscube_mult(filenames,variable,constraint=None,add_coordinates=None):
     from iris.cube import CubeList
     cube_list=[]
-
+    
     for i in range(len(filenames)):
         cube_list.append(loadramscube_single(filenames[i],variable,add_coordinates=add_coordinates) )
     for member in cube_list:
@@ -219,7 +196,6 @@ def loadramscube_mult(filenames,variable,constraint=None,add_coordinates=None):
     variable_cube=variable_cubes.merge_cube()
     variable_cube=variable_cube.extract(constraint)
     return variable_cube
-
 
 def readramsheader(filename):
     from numpy import array
@@ -490,8 +466,32 @@ def calculate_rams_OLR(filenames,**kwargs):
     #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
     return OLR
 
+def calculate_rams_surface_precipitation(filenames,**kwargs):
+    ACCPR=loadramscube(filenames,'ACCPR',**kwargs)    
+    ACCPD=loadramscube(filenames,'ACCPD',**kwargs)
+    ACCPS=loadramscube(filenames,'ACCPS',**kwargs)
+    ACCPP=loadramscube(filenames,'ACCPP',**kwargs)
+    ACCPA=loadramscube(filenames,'ACCPA',**kwargs)
+    ACCPH=loadramscube(filenames,'ACCPH',**kwargs)
+    ACCPG=loadramscube(filenames,'ACCPG',**kwargs)
 
-	
+    surface_precip=ACCPR+ACCPD+ACCPS+ACCPP+ACCPA+ACCPG+ACCPH
+    surface_precip.rename('surface_precipitation')
+    return surface_precip
+
+def calculate_rams_surface_precipitation_accumulated(filenames,**kwargs):
+    PCPRR=loadramscube(filenames,'PCPRR',**kwargs)    
+    PCPRD=loadramscube(filenames,'PCPRD',**kwargs)
+    PCPRS=loadramscube(filenames,'PCPRS',**kwargs)
+    PCPRP=loadramscube(filenames,'PCPRP',**kwargs)
+    PCPRA=loadramscube(filenames,'PCPRA',**kwargs)
+    PCPRH=loadramscube(filenames,'PCPRH',**kwargs)
+    PCPRG=loadramscube(filenames,'PCPRG',**kwargs)
+
+    surface_precip_acc=PCPRR+PCPRD+PCPRS+PCPRP+PCPRA+PCPRG+PCPRH
+    surface_precip_acc.rename('surface_precipitation_accumulated')
+    #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
+    return surface_precip_acc
 
 def mydiff(A):
     import numpy as np
@@ -529,6 +529,10 @@ def deriveramscube(filenames,variable,**kwargs):
         variable_cube=calculate_rams_density(filenames,**kwargs)
     elif variable == 'airmass_path':    
         variable_cube=calculate_rams_airmass_path(filenames,**kwargs)
+    elif variable == 'surface_precipitation':
+        variable_cube=calculate_rams_surface_precipitation(filenames,**kwargs)
+    elif variable == 'surface_precipitation_accumulated':
+        variable_cube=calculate_rams_surface_precipitation_accumulated(filenames,**kwargs)
 
 
 
@@ -604,9 +608,6 @@ def deriveramscube(filenames,variable,**kwargs):
 #        variable_cube=calculate_rams_w_at_T(filenames,**kwargs)
 #        replace_cube=loadramscube(filenames,'T',**kwargs)
 #        variable_cube=replacecoordinates(variable_cube,replace_cube)        
-#    elif variable == 'surface_precipitation':
-#        variable_cube=calculate_rams_surface_precipitation(filenames,**kwargs)
-#        #variable_cube_out=addcoordinates(filenames, 'T',variable_cube,add_coordinates)
 #    elif variable == 'maximum reflectivity':    
 #        variable_cube=calculate_rams_maximum_reflectivity(filenames,**kwargs)
 #    else:
