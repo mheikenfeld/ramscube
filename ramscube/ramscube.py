@@ -120,7 +120,9 @@ variable_list_derive=[
         'airmass',
         'airmass_path',
         'surface_precipitation',
+        'surface_precipitation_average',
         'surface_precipitation_accumulated',
+        'surface_precipitation_instantaneous'
         ]
 
 def variable_list(filenames):
@@ -466,20 +468,7 @@ def calculate_rams_OLR(filenames,**kwargs):
     #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
     return OLR
 
-def calculate_rams_surface_precipitation(filenames,**kwargs):
-    ACCPR=loadramscube(filenames,'ACCPR',**kwargs)    
-    ACCPD=loadramscube(filenames,'ACCPD',**kwargs)
-    ACCPS=loadramscube(filenames,'ACCPS',**kwargs)
-    ACCPP=loadramscube(filenames,'ACCPP',**kwargs)
-    ACCPA=loadramscube(filenames,'ACCPA',**kwargs)
-    ACCPH=loadramscube(filenames,'ACCPH',**kwargs)
-    ACCPG=loadramscube(filenames,'ACCPG',**kwargs)
-
-    surface_precip=ACCPR+ACCPD+ACCPS+ACCPP+ACCPA+ACCPG+ACCPH
-    surface_precip.rename('surface_precipitation')
-    return surface_precip
-
-def calculate_rams_surface_precipitation_accumulated(filenames,**kwargs):
+def calculate_rams_surface_precipitation_instantaneous(filenames,**kwargs):
     PCPRR=loadramscube(filenames,'PCPRR',**kwargs)    
     PCPRD=loadramscube(filenames,'PCPRD',**kwargs)
     PCPRS=loadramscube(filenames,'PCPRS',**kwargs)
@@ -487,11 +476,38 @@ def calculate_rams_surface_precipitation_accumulated(filenames,**kwargs):
     PCPRA=loadramscube(filenames,'PCPRA',**kwargs)
     PCPRH=loadramscube(filenames,'PCPRH',**kwargs)
     PCPRG=loadramscube(filenames,'PCPRG',**kwargs)
+    
+    surface_precip=PCPRR+PCPRD+PCPRS+PCPRP+PCPRA+PCPRG+PCPRH
+    surface_precip.rename('surface_precipitation_instantaneous')
+    return surface_precip
 
-    surface_precip_acc=PCPRR+PCPRD+PCPRS+PCPRP+PCPRA+PCPRG+PCPRH
+def calculate_rams_surface_precipitation_accumulated(filenames,**kwargs):
+    ACCPR=loadramscube(filenames,'ACCPR',**kwargs)    
+    ACCPD=loadramscube(filenames,'ACCPD',**kwargs)
+    ACCPS=loadramscube(filenames,'ACCPS',**kwargs)
+    ACCPP=loadramscube(filenames,'ACCPP',**kwargs)
+    ACCPA=loadramscube(filenames,'ACCPA',**kwargs)
+    ACCPH=loadramscube(filenames,'ACCPH',**kwargs)
+    ACCPG=loadramscube(filenames,'ACCPG',**kwargs)
+    
+    surface_precip_acc=ACCPR+ACCPD+ACCPS+ACCPP+ACCPA+ACCPG+ACCPH
+
     surface_precip_acc.rename('surface_precipitation_accumulated')
     #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
     return surface_precip_acc
+
+def calculate_rams_surface_precipitation_average(filenames,**kwargs):
+    from dask.array import concatenate
+    surface_precip_accum=calculate_rams_surface_precipitation_accumulated(filenames,**kwargs)
+    #caclulate timestep in hours
+    time_coord=surface_precip_accum.coord('time')
+    dt=(time_coord.units.num2date(time_coord.points[1])-time_coord.units.num2date(time_coord.points[0])).total_seconds()/3600.
+    #divide difference in precip between timesteps (in mm/h) by timestep (in h):
+    surface_precip=surface_precip_accum
+    surface_precip.data=concatenate((0*surface_precip.core_data()[[1],:,:],surface_precip.core_data()[1:,:,:]-surface_precip.core_data()[:-1:,:,:]),axis=0)/dt
+    surface_precip.rename('surface_precipitation_average')
+    surface_precip.units= 'mm/h'
+    return surface_precip
 
 def mydiff(A):
     import numpy as np
@@ -529,10 +545,14 @@ def deriveramscube(filenames,variable,**kwargs):
         variable_cube=calculate_rams_density(filenames,**kwargs)
     elif variable == 'airmass_path':    
         variable_cube=calculate_rams_airmass_path(filenames,**kwargs)
-    elif variable == 'surface_precipitation':
-        variable_cube=calculate_rams_surface_precipitation(filenames,**kwargs)
+    elif variable == 'surface_precipitation_average':
+        variable_cube=calculate_rams_surface_precipitation_average(filenames,**kwargs)
     elif variable == 'surface_precipitation_accumulated':
         variable_cube=calculate_rams_surface_precipitation_accumulated(filenames,**kwargs)
+    elif (variable == 'surface_precipitation_instantaneous') or (variable == 'surface_precipitation'):
+        variable_cube=calculate_rams_surface_precipitation_instantaneous(filenames,**kwargs)
+    elif (variable == 'OLR') or (variable == 'outgoing_longwave_radiation'):
+        variable_cube=calculate_rams_OLR(filenames,**kwargs)
 
 
 
