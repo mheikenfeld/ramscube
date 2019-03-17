@@ -109,6 +109,7 @@ RAMS_standard_name=dict()
 
 variable_list_derive=[
         'air_temperature',
+        'air_pressure',
         'temperature',
         'air_density',
         'OLR',
@@ -425,13 +426,21 @@ def calculate_rams_air_temperature(filenames,**kwargs):
     t.rename('air_temperature')
     return t
 
+def calculate_rams_air_pressure(filenames,**kwargs):
+    from iris.coords import AuxCoord
+    pi=loadramscube(filenames,'PI',**kwargs)
+    cp=AuxCoord(1004,long_name='cp',units='J kg-1 K-1')
+    rd=AuxCoord(287,long_name='rd',units='J kg-1 K-1')
+    p = 100000 * (pi/cp)**(cp.points/rd.points) # Pressure in Pa
+    p.rename('air_pressure')
+    p.units='Pa'
+    return p
 
 def calculate_rams_density(filenames,**kwargs):
     rho=loadramscube(filenames,'DN0',**kwargs)
     rho.rename('air_density')
     rho.units='kg m-3'
     return rho
-
         
 def calculate_rams_LWP(filenames,**kwargs):
     from iris.analysis import SUM
@@ -541,6 +550,8 @@ def deriveramscube(filenames,variable,**kwargs):
         variable_cube=calculate_rams_airmass(filenames,**kwargs)
     elif variable == 'air_temperature':    
         variable_cube=calculate_rams_air_temperature(filenames,**kwargs)
+    elif variable=='air_pressure':
+        variable_cube=calculate_rams_air_pressure(filenames,**kwargs)
     elif variable == 'air_density':    
         variable_cube=calculate_rams_density(filenames,**kwargs)
     elif variable == 'airmass_path':    
