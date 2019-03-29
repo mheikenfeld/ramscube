@@ -34,9 +34,11 @@ precipitation_accumulated=['ACCPR','ACCPD','ACCPS','ACCPH','ACCPP','ACCPA','ACCP
 for variable in precipitation_accumulated:
     RAMS_Units[variable]='kg m-2 s-1'
 
-# radiation
+# radiation:
 RAMS_Units['LWUP']='W m-2'
 RAMS_Units['LWDN']='W m-2'
+RAMS_Units['SWUP']='W m-2'
+RAMS_Units['SWDN']='W m-2'
 
 # individual microphysics processes accumulated
 RAMS_processes_mass=[
@@ -123,7 +125,15 @@ variable_list_derive=[
         'surface_precipitation',
         'surface_precipitation_average',
         'surface_precipitation_accumulated',
-        'surface_precipitation_instantaneous'
+        'surface_precipitation_instantaneous',
+        'LWup_TOA',
+        'LWup_sfc',
+        'LWdn_TOA',
+        'LWdn_sfc',
+        'SWup_TOA',
+        'SWup_sfc',
+        'SWdn_TOA',
+        'SWdn_sfc'  
         ]
 
 def variable_list(filenames):
@@ -385,6 +395,9 @@ def calculate_rams_IWC(filenames,**kwargs):
     #IWC.rename('mass_concentration_of_ice_water_in_air')
     return IWC   
 
+
+
+
     
 def calculate_rams_airmass(filenames,**kwargs):
     from iris.coords import AuxCoord
@@ -469,13 +482,68 @@ def calculate_rams_IWV(filenames,**kwargs):
     #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
     return IWV
 
-
-def calculate_rams_OLR(filenames,**kwargs):    
+# Radiation fluxed at the top of the atmospere and at the surface
+def calculate_rams_LWup_TOA(filenames,**kwargs):
+    from iris import Constraint
     LWUP=loadramscube(filenames,'LWUP',**kwargs)
-    OLR=LWUP[:,-1,:,:]
-    OLR.rename('Outgoing longwave radiation')
-    #IWP.rename('atmosphere_mass_content_of_cloud_ice_water')
-    return OLR
+    LWup_TOA=LWUP.extract(Constraint(model_level_number=LWUP.coord('model_level_number').points[-1]))
+    LWup_TOA.rename('LWup_TOA')
+    return LWup_TOA
+
+def calculate_rams_LWup_sfc(filenames,**kwargs):
+    from iris import Constraint
+    LWUP=loadramscube(filenames,'LWUP',**kwargs)
+    LWup_sfc=LWUP.extract(Constraint(model_level_number=0))
+    LWup_sfc.rename('LWup_sfc')
+    return LWup_sfc
+
+def calculate_rams_LWdn_TOA(filenames,**kwargs):
+    from iris import Constraint
+    LWDN=loadramscube(filenames,'LWDN',**kwargs)
+    LWdn_TOA=LWDN.extract(Constraint(model_level_number=LWDN.coord('model_level_number').points[-1]))
+    LWdn_TOA.rename('LWdn_TOA')
+    return LWdn_TOA
+
+def calculate_rams_LWdn_sfc(filenames,**kwargs):
+    from iris import Constraint
+    LWDN=loadramscube(filenames,'LWDN',**kwargs)
+    LWdn_sfc=LWDN.extract(Constraint(model_level_number=0))
+    LWdn_sfc.rename('LWdn_sfc')
+    return LWdn_sfc
+
+def calculate_rams_SWup_TOA(filenames,**kwargs):
+    from iris import Constraint
+    SWUP=loadramscube(filenames,'SWUP',**kwargs)
+    SWup_TOA=SWUP.extract(Constraint(model_level_number=SWUP.coord('model_level_number').points[-1]))
+    SWup_TOA.rename('SWup_TOA')
+    return SWup_TOA
+
+def calculate_rams_SWup_sfc(filenames,**kwargs):
+    from iris import Constraint
+    SWUP=loadramscube(filenames,'SWUP',**kwargs)
+    SWup_sfc=SWUP.extract(Constraint(model_level_number=0))
+    SWup_sfc.rename('SWup_sfc')
+    return SWup_sfc
+
+def calculate_rams_SWdn_TOA(filenames,**kwargs):
+    from iris import Constraint
+    SWDN=loadramscube(filenames,'SWDN',**kwargs)
+    SWdn_TOA=SWDN.extract(Constraint(model_level_number=SWDN.coord('model_level_number').points[-1]))
+    SWdn_TOA.rename('SWdn_TOA')
+    return SWdn_TOA
+
+def calculate_rams_SWdn_sfc(filenames,**kwargs):
+    from iris import Constraint
+    SWDN=loadramscube(filenames,'SWDN',**kwargs)
+    SWdn_sfc=SWDN.extract(Constraint(model_level_number=0))
+    SWdn_sfc.rename('SWdn_sfc')
+    return SWdn_sfc
+
+
+
+
+
+
 
 def calculate_rams_surface_precipitation_instantaneous(filenames,**kwargs):
     PCPRR=loadramscube(filenames,'PCPRR',**kwargs)    
@@ -562,85 +630,23 @@ def deriveramscube(filenames,variable,**kwargs):
         variable_cube=calculate_rams_surface_precipitation_accumulated(filenames,**kwargs)
     elif (variable == 'surface_precipitation_instantaneous') or (variable == 'surface_precipitation'):
         variable_cube=calculate_rams_surface_precipitation_instantaneous(filenames,**kwargs)
-    elif (variable == 'OLR') or (variable == 'outgoing_longwave_radiation'):
-        variable_cube=calculate_rams_OLR(filenames,**kwargs)
+    elif (variable == 'LWup_TOA'):
+        variable_cube=calculate_rams_LWup_TOA(filenames,**kwargs)
+    elif (variable == 'LWup_sfc'):
+        variable_cube=calculate_rams_LWup_sfc(filenames,**kwargs)
+    elif (variable == 'LWdn_TOA'):
+        variable_cube=calculate_rams_LWdn_TOA(filenames,**kwargs)
+    elif (variable == 'LWdn_sfc'):
+        variable_cube=calculate_rams_LWdn_sfc(filenames,**kwargs)
+    elif (variable == 'SWup_TOA'):
+        variable_cube=calculate_rams_SWup_TOA(filenames,**kwargs)
+    elif (variable == 'SWup_sfc'):
+        variable_cube=calculate_rams_SWup_sfc(filenames,**kwargs)
+    elif (variable == 'SWdn_TOA'):
+        variable_cube=calculate_rams_SWdn_TOA(filenames,**kwargs)
+    elif (variable == 'SWdn_sfc'):
+        variable_cube=calculate_rams_SWdn_sfc(filenames,**kwargs)
 
-
-
-    
-#    if variable == 'potential temperature':
-#        variable_cube=calculate_rams_potential_temperature(filenames,**kwargs)
-#        #variable_cube_out=addcoordinates(filenames, 'T',variable_cube,add_coordinates)
-#    elif variable in ['temperature','air_temperature']:
-#        variable_cube=calculate_rams_temperature(filenames,**kwargs)
-#        #variable_cube_out=addcoordinates(filenames, 'T',variable_cube,add_coordinates)
-#    elif variable == 'density':
-#        variable_cube=calculate_rams_density(filenames,**kwargs)
-#        #variable_cube_out=addcoordinates(filenames, 'T',variable_cube,add_coordinates)
-#    elif variable == 'LWC':    
-#        variable_cube=calculate_rams_LWC(filenames,**kwargs)
-#        #variable_cube=addcoordinates(filenames, 'QCLOUD',variable_cube,add_coordinates)
-#    elif variable == 'IWC':    
-#        variable_cube=calculate_rams_IWC(filenames,**kwargs)
-#        #variable_cube=addcoordinates(filenames, 'QICE',variable_cube,add_coordinates)    
-#    elif variable == 'LWP':    
-#        variable_cube=calculate_rams_LWP(filenames,**kwargs)
-#        #variable_cube=addcoordinates(filenames, 'OLR',variable_cube,add_coordinates)
-#    elif variable == 'IWP':    
-#        variable_cube=calculate_rams_IWP(filenames,**kwargs)
-#        #variable_cube=addcoordinates(filenames, 'OLR',variable_cube,add_coordinates)
-#    elif variable == 'IWV':    
-#        variable_cube=calculate_rams_IWV(filenames,**kwargs)
-#        #variable_cube=addcoordinates(filenames, 'OLR',variable_cube,add_coordinates)
-#    elif variable == 'airmass':    
-#        variable_cube=calculate_rams_airmass(filenames,**kwargs)
-#    elif variable == 'layer_height':    
-#        variable_cube=calculate_rams_layerheight(filenames,**kwargs)
-#    elif variable == 'area':    
-#        variable_cube=calculate_rams_area(filenames,**kwargs)        
-#    elif variable == 'geopotential_height':    
-#        variable_cube=calculate_rams_geopotential_height(filenames,**kwargs)
-#        replace_cube=loadramscube(filenames,'T',**kwargs)
-#        variable_cube=replacecoordinates(variable_cube,replace_cube)  
-#    
-#    elif variable == 'geopotential_height_stag':    
-#        variable_cube=calculate_rams_geopotential_height_stag(filenames,**kwargs)
-#
-##    elif variable == 'geopotential_height_xstag':    
-##        variable_cube=calculate_rams_geopotential_height_xstag(filenames,**kwargs)
-##        replace_cube=loadramscube(filenames,'U',**kwargs)
-##        variable_cube=replacecoordinates(variable_cube,replace_cube)  
-##
-##    elif variable == 'geopotential_height_ystag':    
-##        variable_cube=calculate_rams_geopotential_height_ystag(filenames,**kwargs)
-##        replace_cube=loadramscube(filenames,'V',**kwargs)
-##        variable_cube=replacecoordinates(variable_cube,replace_cube)  
-#
-#    elif variable == 'pressure':    
-#        variable_cube=calculate_rams_pressure(filenames,**kwargs)
-#        
-#    elif variable == 'geopotential':    
-#        variable_cube=calculate_rams_geopotential(filenames,**kwargs)
-#
-#    elif variable == 'pressure_xstag':    
-#        variable_cube=calculate_rams_pressure(filenames,**kwargs)
-#        replace_cube=loadramscube(filenames,'U',**kwargs)
-#        variable_cube=replacecoordinates(variable_cube,replace_cube)  
-#
-#    elif variable == 'pressure_ystag':    
-#        variable_cube=calculate_rams_pressure(filenames,**kwargs)
-#        replace_cube=loadramscube(filenames,'V',**kwargs)
-#        variable_cube=replacecoordinates(variable_cube,replace_cube)  
-#
-#    elif variable == 'relative_humidity':    
-#        variable_cube=calculate_rams_relativehumidity(filenames,**kwargs)
-#        #variable_cube_out=addcoordinates(filenames, 'T',variable_cube,add_coordinates)
-#    elif variable == 'w_at_T':    
-#        variable_cube=calculate_rams_w_at_T(filenames,**kwargs)
-#        replace_cube=loadramscube(filenames,'T',**kwargs)
-#        variable_cube=replacecoordinates(variable_cube,replace_cube)        
-#    elif variable == 'maximum reflectivity':    
-#        variable_cube=calculate_rams_maximum_reflectivity(filenames,**kwargs)
-#    else:
-#        raise NameError(variable, 'is not a known variable') 
+    else:
+        raise NameError(variable, 'is not a known variable') 
     return variable_cube
