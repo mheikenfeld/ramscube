@@ -307,7 +307,7 @@ def add_dim_coordinates(filename, variable,variable_cube,variable_dict, coord_di
     if (variable_dict[variable]==3):
         time_coord=make_time_coord(coord_dict)
         variable_cube.add_aux_coord(time_coord)
-        z_coord=coords.DimCoord(coord_dict['ztn03'], standard_name='geopotential_height', long_name='z', var_name='z', units='m', bounds=None, attributes=None, coord_system=coord_system)
+        z_coord=coords.DimCoord(coord_dict['ztn01'], standard_name='geopotential_height', long_name='z', var_name='z', units='m', bounds=None, attributes=None, coord_system=coord_system)
         variable_cube.add_dim_coord(z_coord,0)
         model_level_number_coord=make_model_level_number_coordinate(len(z_coord.points))
         variable_cube.add_aux_coord(model_level_number_coord,0)
