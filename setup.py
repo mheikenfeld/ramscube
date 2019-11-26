@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='ramscube',
-      version='0.9',
+      version='1.0',
       description='Load RAMS output into iris cubes',
       url='http://github.com/mheikenfeld/ramscube',
       author='Max Heikenfeld',
