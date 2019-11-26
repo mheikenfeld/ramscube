@@ -1,12 +1,12 @@
 from setuptools import setup
 
 setup(name='ramscube',
-      version='0.1',
+      version='0.9',
       description='Load RAMS output into iris cubes',
-      url='http://github.com/mheikenfeld/wrfcube',
+      url='http://github.com/mheikenfeld/ramscube',
       author='Max Heikenfeld',
-      author_email='max.heikenfeld@physics.ox.ac.uk',
+      author_email='maxheikenfeld@web.de',
       license='GNU',
       packages=['ramscube'],
-      install_requires=[],#['iris','numpy','netCDF4'],
+      install_requires=[],
       zip_safe=False)
