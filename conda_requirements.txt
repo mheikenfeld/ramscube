@@ -5,5 +5,5 @@
 numpy
 scipy
 iris 
-cf_units
+cf-units
 
